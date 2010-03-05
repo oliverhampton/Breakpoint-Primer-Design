@@ -1,0 +1,21 @@
+program execution pipeline:
+
+1. make_breakpoint_regions.rb -f "lff annotations file of breakpoint regions (two regions per breakpoint)"
+
+    see program descriptions and internal program comments for additional execution conditions.
+
+2. if make_breakpoint_regions.rb was run using both repeat masked and non-repeat masked genomes, 
+    these seperate output files should be concatenated into a single breakpoint regions file
+    before running primer3.
+
+3. make_p3cmd.rb -b "breakpoint region files .txt"
+
+    program assumes "primer3_core" is an executable Primer3 command on current system
+
+4. make_isPCR.rb -b "Primer3 output file .raw"
+
+    Runs inSilico PCR on the Primer3 primer designs, keeps only those passing primer designs
+    that do not produce an amplicon within the expected breakpoint size range when applied to 
+    the normal genome. Generates .lff files of the primer design set, one set for each breakpoint.
+
+    program assumes "isPcr" is an executable command on current system
