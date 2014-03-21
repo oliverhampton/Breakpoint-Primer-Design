@@ -1,16 +1,31 @@
 program execution pipeline:
 
+Note: Primer Design parameters are currently set for Sanger-based sequenicng on the Illumina ABI 3730XL instrument
+
 1. make_breakpoint_regions.rb -f "lff annotations file of breakpoint regions (two regions per breakpoint)"
+   makes the sequence region specified by the input .lff file for each breakpoint required as Primer3 input 
 
-    see program descriptions and internal program comments for additional execution conditions.
+ example:
+   make_breakpoint_regions.rb 
+      -f nextera_breakpoint_calls.lff
+      -r /genome_reference/hg19/masked/oneLineSeq/ || /genome_reference/hg19/unmasked/oneLineSeq/
+      -l RepeatMasked || NonRepeatMasked
+      -t 20
+      -s 1000
 
-2. if make_breakpoint_regions.rb was run using both repeat masked and non-repeat masked genomes, 
-    these seperate output files should be concatenated into a single breakpoint regions file
-    before running primer3.
+2. It is recommeded to execute make_breakpoint_regions.rb using both the repeat masked and non-repeat masked genomes (see item 1), 
+   then these two seperate output files should be concatenated into a single breakpoint regions file before running primer3.
+
+ example:
+   cat nextera_breakpoint_calls.lff_RepeatMasked_regions.txt nextera_breakpoint_calls.lff_NonRepeatMasked_regions.txt > nextera_breakpoint_regions.txt
 
 3. make_p3cmd.rb -b "breakpoint region files .txt"
 
-    program assumes "primer3_core" is an executable Primer3 command on current system
+   execute Primer3 on the concatenated breakpoint regions from Masked and Unmasked genome references. 
+   Assumes Primer3 Version 2.3.5 or higher.
+
+ example:
+   make_p3cmd.rb -b nextera_breakpoint_regions.txt
 
 4. make_isPCR.rb -b "Primer3 output file .raw"
 
@@ -18,4 +33,5 @@ program execution pipeline:
     that do not produce an amplicon within the expected breakpoint size range when applied to 
     the normal genome. Generates .lff files of the primer design set, one set for each breakpoint.
 
-    program assumes "isPcr" is an executable command on current system
+ example:
+   make_isPCR.rb -b nextera_breakpoint_regions_p3cmd_primer3.raw -r /genome_reference/hg19/unmasked/ -s 1000 -m 4000 -l RepeatMasked
